@@ -21,6 +21,8 @@ from ..tools.disasm import extract
 from .code_generator import ast_to_ttir
 from .make_launcher import make_stub
 
+CUDA_DEFAULT_WARP_SIZE = 32
+
 def inline_triton_ir(mod):
     pm = _triton.ir.pass_manager(mod.context)
     pm.enable_debug()
@@ -55,9 +57,9 @@ def optimize_ttir(mod, arch):
     return mod
 
 
-def ttir_to_ttgir(mod, num_warps):
+def ttir_to_ttgir(mod, num_warps, warpsize):
     pm = _triton.ir.pass_manager(mod.context)
-    pm.add_convert_triton_to_tritongpu_pass(num_warps)
+    pm.add_convert_triton_to_tritongpu_pass(num_warps, warpsize)
     pm.run(mod)
     return mod
 
@@ -215,7 +217,7 @@ def get_amdgpu_arch_fulldetails():
         if (len(arch_name_features) == 3):
             arch_features = "+" + re.search('\\w+', arch_name_features[1]).group(0) + ","\
                             "-" + re.search('\\w+', arch_name_features[2]).group(0)
-        return [arch_triple, arch_name, arch_features]
+        return [arch_triple, arch_name, arch_features, warpsize]
     except BaseException:
         return None
 
@@ -396,7 +398,7 @@ def compile(fn, **kwargs):
     stages["ttir"] = (lambda path: parse_mlir_module(path, context),
                       lambda src: optimize_ttir(ast_to_ttir(src, signature, configs[0], constants, debug=debug), arch))
     stages["ttgir"] = (lambda path: parse_mlir_module(path, context),
-                       lambda src: optimize_ttgir(ttir_to_ttgir(src, num_warps), num_stages, arch))
+                       lambda src: optimize_ttgir(ttir_to_ttgir(src, num_warps, CUDA_DEFAULT_WARP_SIZE if _is_cuda(arch) else arch[3]), num_stages, arch))
     stages["llir"] = (lambda path: Path(path).read_text(),
                       lambda src: ttgir_to_llir(src, extern_libs, arch))
     if is_cuda:
