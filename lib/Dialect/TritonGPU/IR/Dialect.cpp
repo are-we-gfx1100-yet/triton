@@ -675,7 +675,7 @@ unsigned DotOperandEncodingAttr::getTotalElemsPerThread(ArrayRef<int64_t> shape,
   if (auto mfmaParent = getParent().dyn_cast<MfmaEncodingAttr>()) {
     int warpsPerCTAM = mfmaParent.getWarpsPerCTA()[0];
     int warpsPerCTAN = mfmaParent.getWarpsPerCTA()[1];
-    constexpr int waveSize = 64;
+    // constexpr int waveSize = 32;
     auto tileSize = getMFMAElemsPerThread(eltTy);
     auto rep = getMFMARep(shape, eltTy);
     return rep[0] * rep[1];

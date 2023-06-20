@@ -256,11 +256,7 @@ struct TritonDotPattern : public OpConversionPattern<triton::DotOp> {
     int numWarps = typeConverter->getNumWarps();
 
     SmallVector<unsigned> retSizePerThread = {1, 1};
-#ifdef USE_ROCM
-    int warpSize = 64;
-#else
     int warpSize = 32;
-#endif
 
     if (origShape[0] * origShape[1] / (numWarps * warpSize) >= 4)
       retSizePerThread = {2, 2};

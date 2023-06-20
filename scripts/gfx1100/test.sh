@@ -14,10 +14,12 @@ chmod -R 777 $LOG_DIR
 
 bash scripts/amd/lit.sh 2>&1 | tee $LOG_DIR/lit.log
 
-UNIT_TEST="python/test/unit/language/test_core_amd.py"
+# UNIT_TEST="python/test/unit/language/test_core_amd.py"
 # UNIT_TEST="python/test/unit/language/test_core_amd.py::test_math_op"
 # UNIT_TEST="python/test/unit/language/test_core_amd.py::test_reduce1d"
 # UNIT_TEST="python/test/unit/language/test_core_amd.py::test_reduce2d"
+# UNIT_TEST="python/test/unit/language/test_core_amd.py::test_convert2d"
+# UNIT_TEST="python/test/unit/language/test_core_amd.py::test_reduce_layouts"
 # UNIT_TEST="python/test/unit/language/test_core.py::test_empty_kernel[float32]"
 # UNIT_TEST="python/test/unit/runtime/test_cache.py::test_compile_in_subproc"
 # UNIT_TEST="python/test/unit/language/test_core_amd.py::test_shift_op[int8-int8-<<]"
@@ -43,7 +45,8 @@ if [ "$1" == "backtrace" ]; then
 		2>&1 | tee $LOG_DIR/backtrace.log
 
 else
-	pytest --capture=tee-sys -rfs --verbose "$UNIT_TEST" 2>&1 | tee $LOG_DIR/unit_test.log
+	# pytest --capture=tee-sys -rfs --verbose "$UNIT_TEST" 2>&1 | tee $LOG_DIR/unit_test.log
+	pytest --capture=tee-sys -rfs --verbose python/test/unit/language/test_core_amd.py -k 'test_math_op or test_reduce1d or test_reduce2d or test_convert2d or test_reduce_layouts' 2>&1 | tee $LOG_DIR/unit_test.log
 fi
 
 # bash scripts/amd/cache_print.sh  2>&1 |tee $LOG_DIR/cache.log

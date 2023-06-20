@@ -207,7 +207,8 @@ private:
       SmallVector<Value> mfmaColIdx(4);
       SmallVector<Value> mfmaRowIdx(16);
       Value threadId = getThreadId(rewriter, loc);
-      Value warpSize = i32_val(64);
+      // TODO: shall we change this?
+      Value warpSize = i32_val(32);
       Value laneId = urem(threadId, warpSize);
       Value warpId = udiv(threadId, warpSize);
       // TODO: fix the bug in MMAEncodingAttr document
