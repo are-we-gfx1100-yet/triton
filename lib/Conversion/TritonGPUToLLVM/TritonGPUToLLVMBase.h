@@ -479,11 +479,7 @@ public:
       auto warpsPerCTA = triton::gpu::getWarpsPerCTA(layout);
       auto order = triton::gpu::getOrder(layout);
       auto shapePerCTA = triton::gpu::getShapePerCTA(layout, shape);
-#ifdef USE_ROCM
       Value warpSize = i32_val(triton::gpu::getWarpSize(layout));
-#else
-      Value warpSize = i32_val(32);
-#endif
       Value laneId = urem(tid, warpSize);
       Value warpId = udiv(tid, warpSize);
       SmallVector<Value> multiDimWarpId =
@@ -719,11 +715,7 @@ private:
       const BlockedEncodingAttr &blocked_layout, RankedTensorType type) const {
     auto shape = type.getShape();
     Value threadId = getThreadId(rewriter, loc);
-#ifdef USE_ROCM
     Value warpSize = i32_val(triton::gpu::getWarpSize(blocked_layout));
-#else
-    Value warpSize = i32_val(32);
-#endif
     Value laneId = urem(threadId, warpSize);
     Value warpId = udiv(threadId, warpSize);
     auto sizePerThread = blocked_layout.getSizePerThread();
