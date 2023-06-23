@@ -101,6 +101,15 @@ SmallVector<unsigned> getThreadsPerWarp(Attribute layout) {
   return {};
 }
 
+unsigned getWarpSize(Attribute layout) {
+  unsigned size = 1;
+  auto threadsPerWarp = getThreadsPerWarp(layout);
+  for (auto e : threadsPerWarp) {
+    size *= e;
+  }
+  return size;
+}
+
 SmallVector<unsigned>
 getThreadsPerWarpWithUniqueData(Attribute layout,
                                 ArrayRef<int64_t> tensorShape) {
@@ -675,7 +684,7 @@ unsigned DotOperandEncodingAttr::getTotalElemsPerThread(ArrayRef<int64_t> shape,
   if (auto mfmaParent = getParent().dyn_cast<MfmaEncodingAttr>()) {
     int warpsPerCTAM = mfmaParent.getWarpsPerCTA()[0];
     int warpsPerCTAN = mfmaParent.getWarpsPerCTA()[1];
-    // constexpr int waveSize = 32;
+    constexpr int waveSize = 64;
     auto tileSize = getMFMAElemsPerThread(eltTy);
     auto rep = getMFMARep(shape, eltTy);
     return rep[0] * rep[1];
