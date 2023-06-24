@@ -2172,6 +2172,20 @@ else:
         BlockedLayout([4, 4], [1, 32], [4, 1], [1, 0])
     ]
 
+layouts = [
+    # MmaLayout(version=1, warps_per_cta=[1, 4]),
+    MmaLayout(version=(2, 0), warps_per_cta=[1, 4]),
+    # MmaLayout(version=1, warps_per_cta=[4, 1]),
+    MmaLayout(version=(2, 0), warps_per_cta=[4, 1]),
+    BlockedLayout([1, 2], [2, 16], [2, 2], [1, 0]),
+    BlockedLayout([2, 2], [4, 8], [2, 2], [1, 0]),
+    BlockedLayout([1, 1], [1, 32], [2, 2], [1, 0]),
+    BlockedLayout([4, 2], [16, 2], [1, 4], [0, 1]),
+    BlockedLayout([4, 2], [8, 4], [2, 2], [0, 1]),
+    BlockedLayout([1, 1], [32, 1], [2, 2], [0, 1]),
+    BlockedLayout([4, 2], [1, 32], [4, 1], [1, 0])
+]
+
 @pytest.mark.parametrize("shape", [(128, 128)])
 @pytest.mark.parametrize("dtype", ['float16'])
 @pytest.mark.parametrize("src_layout", layouts)
@@ -2237,6 +2251,13 @@ else:
         MmaLayout(version=(2, 0), warps_per_cta=[4, 1])
     ]
     shapes = [[128, 16], [128, 128], [32, 128]]
+
+layouts = [
+    BlockedLayout([1, 4], [8, 4], [4, 1], [1, 0]),
+    BlockedLayout([1, 4], [8, 4], [4, 1], [0, 1]),
+    MmaLayout(version=(2, 0), warps_per_cta=[4, 1])
+]
+shapes = [[128, 16], [128, 128], [32, 128]]
 
 @pytest.mark.parametrize("M, N", shapes)
 @pytest.mark.parametrize("src_layout", layouts)
@@ -2308,6 +2329,7 @@ def test_reduce_layouts(M, N, src_layout, axis, device='cuda'):
 @pytest.mark.parametrize("src_layout", [MfmaLayout(warps_per_cta=[2, 1]), MfmaLayout(warps_per_cta=[4, 1])])
 @pytest.mark.parametrize("dst_layout", [BlockedLayout([1, 4], [4, 16], [1, 1], [1, 0])])
 def test_make_range(dtype, shape, src_layout, dst_layout, device='cuda'):
+    pytest.skip("Not supported: mfma is not supported on gfx1100.")
     ir = f"""
 #src = {src_layout}
 #dst = {dst_layout}
